@@ -1,0 +1,150 @@
+/* Reset básico e fontes */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Courier New', Courier, monospace;
+}
+
+body {
+    background-color: #080c10;
+    color: #00ffcc;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+/* Contentor do Terminal */
+.terminal-container {
+    width: 100%;
+    max-width: 800px;
+    background: #0d141d;
+    border: 2px solid #00ffcc;
+    box-shadow: 0 0 20px rgba(0, 255, 204, 0.2);
+    border-radius: 8px;
+    padding: 24px;
+}
+
+/* Cabeçalho */
+.terminal-header {
+    border-bottom: 1px solid #00ffcc;
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.glitch-text {
+    font-size: 2rem;
+    letter-spacing: 4px;
+    color: #00ffcc;
+    text-shadow: 0 0 10px #00ffcc;
+}
+
+.status-bar {
+    font-size: 0.85rem;
+    color: #58a6ff;
+    margin-top: 5px;
+}
+
+/* Seleção de Facção */
+.faction-selector {
+    margin-bottom: 20px;
+}
+
+.faction-selector label {
+    display: block;
+    font-size: 0.9rem;
+    margin-bottom: 8px;
+    color: #8b949e;
+}
+
+.radio-group {
+    display: flex;
+    gap: 20px;
+}
+
+.radio-label {
+    cursor: pointer;
+    font-weight: bold;
+    padding: 6px 12px;
+    border: 1px solid #30363d;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.radio-label.autobot {
+    color: #ff4d4d;
+}
+
+.radio-label.decepticon {
+    color: #a371f7;
+}
+
+.radio-label:hover {
+    border-color: #00ffcc;
+    background: rgba(0, 255, 204, 0.05);
+}
+
+/* Secções de Input/Output */
+.input-section, .output-section {
+    margin-bottom: 20px;
+}
+
+.input-section label, .output-section label {
+    display: block;
+    font-size: 0.85rem;
+    margin-bottom: 6px;
+    color: #8b949e;
+}
+
+textarea {
+    width: 100%;
+    height: 110px;
+    background-color: #030712;
+    border: 1px solid #30363d;
+    border-radius: 6px;
+    color: #00ffcc;
+    padding: 12px;
+    font-size: 1rem;
+    resize: vertical;
+}
+
+textarea:focus {
+    outline: none;
+    border-color: #00ffcc;
+    box-shadow: 0 0 8px rgba(0, 255, 204, 0.3);
+}
+
+/* Botões */
+.action-buttons {
+    margin-bottom: 20px;
+}
+
+button {
+    width: 100%;
+    padding: 12px;
+    background: #00ffcc;
+    color: #080c10;
+    font-weight: bold;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: background 0.2s ease;
+}
+
+button:hover {
+    background: #00cca3;
+    box-shadow: 0 0 12px rgba(0, 255, 204, 0.5);
+}
+
+/* Rodapé */
+.terminal-footer {
+    border-top: 1px solid #30363d;
+    padding-top: 12px;
+    text-align: center;
+    font-size: 0.75rem;
+    color: #484f58;
+}

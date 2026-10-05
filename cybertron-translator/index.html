@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CYBERTRON // Cybertronian Translator</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="terminal-container">
+        <!-- Cabeçalho -->
+        <header class="terminal-header">
+            <h1 class="glitch-text">CYBERTRON</h1>
+            <p class="status-bar">[STATUS: ONLINE] // SYSTEM: CYBERTRONIAN TRANSLATOR</p>
+        </header>
+
+        <!-- ECRÃ 1: SELEÇÃO DE MODO DE TRADUÇÃO -->
+        <main id="modeSelectionScreen" class="terminal-body">
+            <h2 class="section-title">SELECIONAR DIRETRIZ DE OPERAÇÃO:</h2>
+            <div class="mode-buttons">
+                <button class="btn-mode" onclick="selectMode('h2c')">
+                    [1] HUMANO &rarr; CYBERTRONIANO
+                    <span>(Codificar mensagem para o Spark)</span>
+                </button>
+                <button class="btn-mode" onclick="selectMode('c2h')">
+                    [2] CYBERTRONIANO &rarr; HUMANO
+                    <span>(Decodificar transmissão inbound)</span>
+                </button>
+            </div>
+        </main>
+
+        <!-- ECRÃ 2: INTERFACE DE TRADUÇÃO -->
+        <main id="translatorScreen" class="terminal-body" style="display: none;">
+            <div class="top-nav">
+                <button class="btn-back" onclick="goBack()">&larr; ALTERAR MODO</button>
+                <span id="currentModeLabel" class="mode-badge">MODO: --</span>
+            </div>
+
+            <!-- Seleção de Facção -->
+            <div class="faction-selector">
+                <label>SELECIONAR PROTOCOLO DE FACÇÃO:</label>
+                <div class="radio-group">
+                    <label class="radio-label autobot">
+                        <input type="radio" name="faction" value="autobot" checked> AUTOBOT
+                    </label>
+                    <label class="radio-label decepticon">
+                        <input type="radio" name="faction" value="decepticon"> DECEPTICON
+                    </label>
+                </div>
+            </div>
+
+            <!-- Entrada de Texto -->
+            <div class="input-section">
+                <label id="inputLabel" for="inputText">TRANSMISSÃO (ENTRADA):</label>
+                <textarea id="inputText" placeholder="Digita aqui a tua mensagem..."></textarea>
+            </div>
+
+            <!-- Botão de Ação -->
+            <div class="action-buttons">
+                <button id="btnAction" onclick="processTranslation()">PROCESSAR DADOS</button>
+            </div>
+
+            <!-- Saída -->
+            <div class="output-section">
+                <label id="outputLabel" for="outputText">PACOTE DE DADOS (SAÍDA):</label>
+                <textarea id="outputText" readonly placeholder="O resultado surgirá aqui..."></textarea>
+            </div>
+        </main>
+
+        <!-- Rodapé -->
+        <footer class="terminal-footer">
+            <p>AUTOBOT CODEBASE // SECURE TRANSMISSION CHANNEL</p>
+        </footer>
+    </div>
+
+    <!-- LÓGICA DO TRADUTOR -->
+    <script>
+        let currentMode = 'h2c';
+
+        const CYBERTRONIAN_ALPHABETS = {
+            autobot: {
+                'A': '2',   'B': '1',   'C': 'τ',   'D': 'ν',   'E': '⎩',   
+                'F': 'IL',  'G': '⊇',   'H': '⊏',   'I': 'L',   'J': '4"',  
+                'K': 'Γsq', 'L': '∫',   'M': '≀a',  'N': 'U',   'O': '7',   
+                'P': '//',  'Q': 'ヒ',  'R': '≂',   'S': '⎍',   'T': 'π',   
+                'U': '⎍⎍', 'V': '∩',   'W': 'Π',   'X': '=',   'Y': '⍝',   'Z': 'ʃ'
+            },
+            decepticon: {
+                'A': '୧',   'B': 'e',   'C': 'τ',   'D': 't',   'E': 'ɛ',   
+                'F': '⩤',   'G': '∫',   'H': '1',   'I': '𝜏',   'J': 'G',   
+                'K': '⑀',   'L': '⢺',   'M': '⍝',   'N': '◩',   'O': '7',   
+                'P': '┒',   'Q': 'ʃ',   'R': '⍝⍝',  'S': '𝜏',   'T': '⬎',   
+                'U': '⎍',   'V': '∭',   'W': '∫',   'X': '⌠',   'Y': '⌋',   'Z': '⍺'
+            },
+            numbers: {
+                '1': '▔',   '2': 'ヘ',   '3': 'シ',   '4': 'ョ',   '5': 'ヨ',   
+                '6': '⊃',   '7': '╞',   '8': '⊏',   '9': '▔▔',  '0': '⑺'
+            }
+        };
+
+        const LORE_DICTIONARY = {
+            "amigo": "ALLIED-UNIT",     "amigos": "ALLIED-UNITS",
+            "inimigo": "DECEPTICON-THREAT", "inimigos": "DECEPTICON-THREATS",
+            "casa": "BASE-SECTOR",      "escola": "DATA-ACADEMY", 
+            "faculdade": "DATA-ACADEMY", "ir": "ROLL-OUT", 
+            "vamos": "ROLL-OUT",        "segredo": "ENCRYPTED-SPARK",
+            "sim": "ACKNOWLEDGED",      "não": "OVERRIDE-DENIED", 
+            "nao": "OVERRIDE-DENIED",   "perigo": "SYSTEM-FAILURE", 
+            "falar": "TRANSMIT-AUDIO",  "ajuda": "REINFORCEMENTS-NEEDED"
+        };
+
+        const REVERSE_LORE = {};
+        for (let [k, v] of Object.entries(LORE_DICTIONARY)) {
+            REVERSE_LORE[v] = k;
+        }
+
+        function selectMode(mode) {
+            currentMode = mode;
+            document.getElementById('modeSelectionScreen').style.display = 'none';
+            document.getElementById('translatorScreen').style.display = 'block';
+
+            const modeLabel = document.getElementById('currentModeLabel');
+            const inputLabel = document.getElementById('inputLabel');
+            const outputLabel = document.getElementById('outputLabel');
+            const btnAction = document.getElementById('btnAction');
+
+            if (mode === 'h2c') {
+                modeLabel.innerText = "MODO: HUMANO -> CYBERTRONIANO";
+                inputLabel.innerText = "TRANSMISSÃO HUMANA (ENTRADA):";
+                outputLabel.innerText = "PACOTE DE DADOS CYBERTRONIANO (SAÍDA):";
+                btnAction.innerText = "CODIFICAR [HUMANO -> CYBERTRONIANO]";
+            } else {
+                modeLabel.innerText = "MODO: CYBERTRONIANO -> HUMANO";
+                inputLabel.innerText = "PACOTE CYBERTRONIANO (ENTRADA):";
+                outputLabel.innerText = "TRANSMISSÃO DECODIFICADA (SAÍDA):";
+                btnAction.innerText = "DECODIFICAR [CYBERTRONIANO -> HUMANO]";
+            }
+        }
+
+        function goBack() {
+            document.getElementById('translatorScreen').style.display = 'none';
+            document.getElementById('modeSelectionScreen').style.display = 'block';
+            document.getElementById('inputText').value = '';
+            document.getElementById('outputText').value = '';
+        }
+
+        function encodeToCybertronian(text, faction) {
+            let words = text.toLowerCase().split(' ');
+            let translatedWords = words.map(word => {
+                let cleanWord = word.replace(/[.,?!]/g, '');
+                return LORE_DICTIONARY[cleanWord] ? LORE_DICTIONARY[cleanWord] : word;
+            });
+
+            let processedText = translatedWords.join(' ').toUpperCase();
+            let alphabet = CYBERTRONIAN_ALPHABETS[faction] || CYBERTRONIAN_ALPHABETS.autobot;
+            let cipheredText = '';
+
+            for (let char of processedText) {
+                if (alphabet[char]) {
+                    cipheredText += alphabet[char];
+                } else if (CYBERTRONIAN_ALPHABETS.numbers[char]) {
+                    cipheredText += CYBERTRONIAN_ALPHABETS.numbers[char];
+                } else {
+                    cipheredText += char;
+                }
+            }
+
+            return `[TRANSMISSION_BURST // FACTION: ${faction.toUpperCase()}]\n${cipheredText}\n[END_PACKET]`;
+        }
+
+        function decodeToHuman(text, faction) {
+            let cleanText = text.replace(/\[TRANSMISSION_BURST \/\/ FACTION: (AUTOBOT\vert{}DECEPTICON)\]/g, '')
+                                .replace(/\[END_PACKET\]/g, '')
+                                .trim();
+
+            let alphabet = CYBERTRONIAN_ALPHABETS[faction] || CYBERTRONIAN_ALPHABETS.autobot;
+            
+            let reverseAlpha = {};
+            for (let [letter, symbol] of Object.entries(alphabet)) {
+                if (symbol) reverseAlpha[symbol] = letter;
+            }
+            for (let [num, symbol] of Object.entries(CYBERTRONIAN_ALPHABETS.numbers)) {
+                if (symbol) reverseAlpha[symbol] = num;
+            }
+
+            let sortedSymbols = Object.keys(reverseAlpha).sort((a, b) => b.length - a.length);
+            let decoded = cleanText;
+
+            sortedSymbols.forEach(sym => {
+                if (sym) {
+                    decoded = decoded.split(sym).join(reverseAlpha[sym]);
+                }
+            });
+
+            let words = decoded.split(' ');
+            let humanWords = words.map(w => {
+                let cleanW = w.trim().toUpperCase();
+                return REVERSE_LORE[cleanW] ? REVERSE_LORE[cleanW].toUpperCase() : w;
+            });
+
+            return humanWords.join(' ');
+        }
+
+        function processTranslation() {
+            const inputElement = document.getElementById('inputText');
+            const outputElement = document.getElementById('outputText');
+            const textToTranslate = inputElement.value.trim();
+
+            if (!textToTranslate) {
+                outputElement.value = '[ERRO // NENHUM DADO DETETADO PARA PROCESSAR]';
+                return;
+            }
+
+            const selectedFaction = document.querySelector('input[name="faction"]:checked').value;
+
+            if (currentMode === 'h2c') {
+                outputElement.value = encodeToCybertronian(textToTranslate, selectedFaction);
+            } else {
+                outputElement.value = decodeToHuman(textToTranslate, selectedFaction);
+            }
+        }
+    </script>
+</body>
+</html>
